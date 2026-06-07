@@ -9,9 +9,6 @@ slide: false
 
 a processor description file (pattern file) for x86_64-v3 on axx
 
-
-https://qiita.com/fygar256/items/1d06fb757ac422796e31
-
 This is an axx pattern file that fully covers the x86_64-v3 ISA.
 
 While the x86_64 ISA is large and complex, it's essentially just a generic processor ISA with a finite static transformation system where the bytecode is fixed after assembly, loaded into memory, and executed. Therefore, all instructions and addressing modes of the x86_64 ISA can be completely written using an axx pattern file. The complexity of x86_64 simply lies in the large number of patterns for these 'finite static transformations'. Moreover, this can be abstracted and simplified by the axx syntax.
@@ -97,7 +94,5 @@ For practical use (assembler generation, shellcode, code generation tools, etc.)
 -------------------------------------------------------------------Grok complete
 
 What remains is the full application of the v3 architecture and the v4 part. However, I think this file is sufficient for normal programming purposes.
-
-https://github.com/fygar256/axx/blob/main/x86_64.axx
 
 Now it can also handle Coffee Lake processors.
