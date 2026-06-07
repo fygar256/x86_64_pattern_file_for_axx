@@ -33,7 +33,7 @@ Currently, it looks like this, but using the axx `.check` directive eliminates t
 
 Handling segment registers and the segment override addressing instructions can also be greatly simplified using the `.check` directive and bitwise operations.
 
-Because axx is minor, or perhaps difficult, the AI ​​cannot understand the entire axx syntax and ends up enumerating it, which contributes to the redundancy of the pattern file. I hope that if the AI ​​understands the axx ISADSL and knows the target ISA, it will be able to freely generate axx pattern files. The axx ISASL is at a much lower layer than CGen or LLVM.
+Because axx is minor, or perhaps difficult, the AI ​​cannot understand the entire axx syntax and ends up enumerating it, which contributes to the redundancy of the pattern file. I hope that if the AI ​​understands the axx ISADSL and knows the target ISA, it will be able to freely generate axx pattern files. The axx ISADSL is at a much lower layer than CGen or LLVM.
 
 Here, I've had the critical Grok check it, and I'll post the output.
 
