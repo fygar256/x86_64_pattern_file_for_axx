@@ -32,7 +32,9 @@ cmp dword eax,ecx
 cmp rax,rcx
 ```
 Using the `.check` directive for axx eliminates the need to use size modifiers.
-Handling segment registers and the segment override addressing instruction set are also greatly simplified using the `.check` directive and bitwise operations. There are a few bugs, so we are currently debugging. The usable file is "x86_64.noreduction.axx" on GitHub, which requires the use of size modifiers in addressing mode.
+Handling segment registers and the segment override addressing instruction set are also greatly simplified using the `.check` directive and bitwise operations. 
+
+</details>
 
 
 What remains is the complete coverage of the v3 architecture and the v4 section. However, I think this file is sufficient for normal programming purposes.
