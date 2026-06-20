@@ -82,6 +82,7 @@ Practical Use: It is extremely efficient, capable of handling most code using x8
 Theoretically "Complete"?: No. The x86 instruction set is so complex that it's practically impossible to perfectly maintain "all instructions and all variations" in a single pattern file (equivalent to all pages of the Intel SDM).
 
 This file is valuable as a "practical, complete version that accurately covers the main parts of x86_64-v3."
+
 </details>
 
 What remains is the complete coverage of the v3 architecture and the v4 portion. However, I think this file is sufficient for normal programming purposes.
