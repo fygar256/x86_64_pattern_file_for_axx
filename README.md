@@ -37,52 +37,88 @@ Handling segment registers and the segment override addressing instruction set a
 
 <details>
 <summary>Grok Evaluation Output</summary>
-Does this file truly cover all x86_64-v3 instructions and addressing modes? Yes, it's fairly comprehensive, but it can't be said to "perfectly cover 100% of all instructions and addressing modes." It's a very high-quality, practically sufficient, "almost complete" pattern file.
+**Evaluation Result: A high-quality, highly practical x86_64 instruction pattern file (v10.0 simplified version)**
 
-Strengths (Well-covered areas)
+This file (`x86_64.axx`; approx. 3.6 MB, 24,025 lines, ~22,800 patterns) is a **complete x86_64 encoding pattern definition** for the custom assembler "axx." As indicated by the comments, it is the product of incremental expansion and simplification spanning versions v6.0 through v10.0, and it merits high praise for the following reasons:
 
-Addressing modes: Extremely thorough and comprehensive.
+### 1. Overall Structure and Design Philosophy (Excellent)
 
-Standard forms ([b], [b+disp8/32], RIP relative)
-All SIB scales (*1/*2/*4/*8)
-Perfect exception handling for RSP/R12 (SIB required) and RBP/R13 (disp8=0 special form)
-Partial support for [symbol + reg] format
-Segment overrides (especially FS/GS + all sizes MOV/immediate/string instructions) are significantly enhanced in v8-v10.
-Basic instructions: MOV (all sizes, all directions, immediate, segment), ALU (ADD/ADC/SUB/...), LEA, PUSH/POP, Shift, Rotate, etc. are very comprehensive.
-x87 FPU: As declared in v9/v10 as the "complete version," it broadly covers FLD/FST/FADD/.../FPU control instructions.
+- **Separation of Register Definitions and Size Constraints**
+It clearly defines registers—RAX–R15 / EAX–R15D / AX–R15W / AL–R15B + AH–BH, XMM0–15, YMM0–15, ZMM0–31, K0–7, segment registers, and x87 ST0–ST7—using `.setsym`. 
+It excels in strictly limiting sizes via `.check::j/k` (BYTE), `n/m` (WORD), `f/t` (DWORD), and `d/s` (QWORD), while explicitly specifying the evaluation order as "BYTE → WORD → DWORD → QWORD." The simplification in v10—which eliminated the need for size modifiers—is also a rational design choice. - **Comprehensive Addressing Mode Support**
+Covers the following almost entirely:
+- Register direct
+- Immediate (imm8 sign-extended / imm32 / imm64)
+- [base]
+- [base + disp8] / [base + disp32]
+- RIP-relative
+- SIB (scale=1/2/4/8; base+index; no-base+symbol)
+- Cases requiring SIB=0x24 for RSP/R12
+- Special cases for RBP/R13 (mod=01 + disp8=0)
+- Absolute address (SIB abs32 format)
+- Segment overrides (especially FS/GS)
 
-x86_64-v3 related:
-BMI1/BMI2 (ANDN, BEXTR, BLSR, BLSMSK, BLSI, PDEP, PEXT, MULX, RORX, SARX, etc.)
-LZCNT/TZCNT
-AVX/AVX2/FMA3 address mode support enhanced in v7.0
+Sections explicitly marked in comments as "order matters" or "fixed" (e.g., evaluating `[b]` before `[!a]`) demonstrate a proper understanding of assembler matching-order issues—a detail of great practical importance.
 
-Other: Segment register operations (including LFS/LGS/LSS), MOVABS, string instructions (FS/GS override with REP) are also well-implemented.
+- **Transparent Version History**
+Additions are clearly defined across versions: v6 (SSE3/SSE4.2/RDRAND/MOVBE), v7 (BMI1/2 + full addressing for AVX/AVX2/FMA3), v8 (full segment support), v9 (complete x87 FPU support), and v10 (simplification). ### 2. Instruction Coverage (Very High)
 
-Potential shortcomings/weaknesses
+| Category | Approx. Number of Patterns | Evaluation |
+|-----------------------|----------------|------|
+| Basic MOV / ALU / LEA / PUSH/POP, etc. | Thousands | Excellent; supports all addressing modes |
+| x87 FPU               | Approx. 1,560 | Includes FLD/FST/FSTP, arithmetic, comparison, conditional moves, environment saving, etc.—truly a "complete" set |
+| SSE / SSE2 / SSE3 / SSE4 Series | Approx. 1,500+ | Covers scalar/packed operations and various addressing modes |
+| BMI1/BMI2 + LZCNT/TZCNT | Approx. 626 | Supports 64/32/16-bit modes |
+| Segment-related       | Approx. 105 | MOV sreg↔r/mem, PUSH/POP FS/GS, LFS/LGS/LSS, string instruction overrides |
+| AVX / AVX2 / FMA-related | Numerous (latter half of file) | Designed to cover all addressing modes |
 
-Completeness of the latest extensions:
-AVX-512 (ZMM/K mask) has register definitions, but the pattern descriptions are likely insufficient (especially all variations of the EVEX prefix, embedded broadcast, {k}{z}, etc.).
+It is rare to find a pattern file that incorporates **x87 and segment overrides** with such meticulous detail. The content is exceptionally comprehensive—perhaps even more so than what is typically required for assembler testing.
 
-Newer instruction sets such as APX (extended prefix), CET, SHA, VAES, and VPCLMULQDQ may have thin or missing descriptions.
+### 3. Encoding Quality and Points to Note
 
-Complete Instruction Coverage:
-x86_64 has a vast number of instructions (especially vector instructions with immediate/memory/register combinations). This file focuses on "major instructions + important v3 extensions," and minor instructions (e.g., specific system instructions, enclave, AMX, specific prefix combinations) are likely to be omitted.
+**Strengths**
+- REX prefix calculation (e.g., `((reg&8)?0x4x:0)`) is systematic.
+- ModRM/SIB generation logic aligns with comments and correctly handles special cases involving RSP/R12 and RBP/R13.
+- MOVABS (moffs64) is explicitly separated.
+- Size-specific handling for immediate stores (e.g., C6/C7 + 66h) is fully implemented.
+- Numerous comments regarding match-order adjustments indicate that past bugs have been addressed. **Potential Concerns & Areas for Improvement**
+1. **File Size and Matching Performance**
+The 22,800 patterns likely impose a heavy load on the assembler's pattern-matching process. Although "simplification" was implemented in v10, redundancies remain (particularly regarding the expansion of SSE/AVX instructions based on scale factors).
 
-Edge Cases:
-Some extremely complex SIB + segment + REX + prefix combinations.
-Some behavior in 16-bit/32-bit compatibility mode (primarily 64-bit mode).
+2. **Handling of AVX-512 / EVEX**
+While definitions for ZMM0-31 and K0-7 exist, patterns for EVEX prefixes and masked instructions are limited (or concentrated in the latter section). This is insufficient for full support of x86_64-v3/v4.
 
-File Nature:
-This is an "axx" pattern file (macro/template collection) for assembly language. If any instructions are missing, they cannot be assembled.
+3. **Instruction Priority**
+There are notes—such as prioritizing register forms over immediate forms—but fully verifying consistency across the entire set is difficult. Regression testing using the actual axx engine is essential.
 
-Conclusion:
+4. **Readability**
+Some patterns are extremely long, with single lines spanning hundreds of characters. They were likely machine-generated, making human review difficult.
 
-Practical Use: It is extremely efficient, capable of handling most code using x86_64 core to v3 level (AVX2/BMI2/FMA) without problems. Particularly powerful for low-level/system programming, shellcode, bootloaders, and x87-based code.
+5. **Unverified Areas**
+- Certain legacy instructions (e.g., `BOUND`) and rarely used special instructions. 
+- The strictness of excluding instructions invalid in 64-bit mode. 
+- Whether the handling of relocations (e.g., `@@[4,*(s,%%)]`) perfectly matches the axx linker's implementation.
 
-Theoretically "Complete"?: No. The x86 instruction set is so complex that it's practically impossible to perfectly maintain "all instructions and all variations" in a single pattern file (equivalent to all pages of the Intel SDM).
+### 4. Overall Assessment
 
-This file is valuable as a "practical, complete version that accurately covers the main parts of x86_64-v3."
+| Item | Score | Comments |
+| :--- | :--- | :--- |
+| **Coverage** | 95/100 | Practically sufficient; near-complete, excluding AVX-512. |
+| **Encoding Accuracy** | 90/100 | Careful handling of special cases (RSP/R12, RBP/R13, segments). |
+| **Design & Maintainability** | 85/100 | Simplification has progressed, but the codebase remains massive. | A system combining machine generation and verification is desirable |
+| Practicality (for axx) | 95/100 | With this file, axx can handle serious x86_64 assembly |
+| **Overall** | **92/100** | An outstanding deliverable |
 
+**Conclusion & Recommendation**
+
+This file is a **high-quality assembler pattern definition** that thoroughly covers "almost all x86_64 addressing modes + x87 + major SIMD + BMI + segments." The evolution regarding segments, x87, and simplification—particularly from versions v8 to v10—is especially impressive.
+
+Areas for improvement:
+- Full-scale addition of AVX-512 / EVEX support
+- Size reduction through further pattern unification (using macros)
+- Integration with an automated test suite (verifying differences against known-correct binaries)
+
+Even in its current state, it far exceeds the level required for practical use in axx's x86_64 support. Excellent work.
 </details>
 
 What remains is the complete coverage of the v3 architecture and the v4 portion. However, I think this file is sufficient for normal programming purposes.
