@@ -6,7 +6,7 @@ slide: false
 ---
 https://qiita.com/fygar256/items/1d06fb757ac422796e31
 
-This is an axx pattern file that covers the x86_64-v3 ISA.
+These are axx pattern files that covers the x86_64-v3 ISA. x86_64.axx is a pattern file. x86_64m.axx is a pattern file with macro.
 
 Although the x86_64 ISA is vast and complex, it is ultimately just a generic processor ISA based on a finite static transformation system: assembly results in fixed bytecode, which is then loaded into memory and executed. Consequently, every instruction and addressing mode of the x86_64 ISA can be fully described using axx's ISADSL. The complexity of x86_64 simply stems from the sheer number of "finite static transformation" patterns involved. Moreover, these patterns can be abstracted and simplified using axx's syntax.
 
